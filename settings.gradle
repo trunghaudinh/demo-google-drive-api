@@ -1,0 +1,2 @@
+include ':app', ':gdrivedebuglib'
+rootProject.name='DemoGG'
