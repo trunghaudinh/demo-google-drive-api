@@ -2,7 +2,7 @@ package com.example.demogg.model;
 
 import com.google.api.client.util.DateTime;
 
-public class GoogleDriveFileHolder {
+public class GoogleDrive {
     private String id;
     private String name;
     private DateTime modifiedTime;
@@ -10,6 +10,14 @@ public class GoogleDriveFileHolder {
     private DateTime createdTime;
     private Boolean starred;
 
+    public GoogleDrive(String name, long size, DateTime createdTime) {
+        this.name = name;
+        this.size = size;
+        this.createdTime = createdTime;
+    }
+
+    public GoogleDrive() {
+    }
 
     public DateTime getCreatedTime() {
         return createdTime;

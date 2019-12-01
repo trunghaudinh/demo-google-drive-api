@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.demogg.drive.DriveServiceHelper;
-import com.example.demogg.model.GoogleDriveFileHolder;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -43,6 +43,8 @@ public class SignInActivity extends AppCompatActivity {
     ////drive
 
     DriveServiceHelper mDriveServiceHelper;
+    Button btnShow;
+    Button btnShowList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +52,8 @@ public class SignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         signInButton = findViewById(R.id.sign_in_button);
+        btnShow = findViewById(R.id.btnShow);
+        btnShowList = findViewById(R.id.btnShowList);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(SignInActivity.this);
@@ -74,9 +78,11 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     public void initCredential(GoogleSignInAccount account) {
+
         GoogleAccountCredential credential =
                 GoogleAccountCredential.usingOAuth2(
                         getApplicationContext(), Collections.singleton(DriveScopes.DRIVE_FILE));
+
         credential.setSelectedAccount(account.getAccount());
         com.google.api.services.drive.Drive googleDriveService =
                 new com.google.api.services.drive.Drive.Builder(
@@ -88,20 +94,61 @@ public class SignInActivity extends AppCompatActivity {
         mDriveServiceHelper = new DriveServiceHelper(googleDriveService);
 
 
-        Task<GoogleDriveFileHolder> search = mDriveServiceHelper.searchFile("Bz_Dinotes","application/vnd.google-apps.spreadsheet");
-        if (search.isComplete()){
-//            Toast.makeText(this, "isComplete", Toast.LENGTH_SHORT).show();
-            Log.i("haudau","isComplete");
-        }else if(search.isSuccessful()){
-//            Toast.makeText(this, "isSuccessful", Toast.LENGTH_SHORT).show();
-            Log.i("haudau","isSuccessful");
-        }else {
+        btnShow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(mDriveServiceHelper.createFilePickerIntent());
+            }
+        });
 
-//            Toast.makeText(this, "Cancel", Toast.LENGTH_SHORT).show();
-            Log.i("haudau","Cancel");
-        }
+        btnShowList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                createFile();
+
+
+            }
+        });
+
+
+
+
 
     }
+
+    private void createFile() {
+        if (mDriveServiceHelper != null) {
+            Log.d(TAG, "Creating a file.");
+
+            mDriveServiceHelper.createFile()
+                    .addOnSuccessListener(fileId -> readFile(fileId))
+                    .addOnFailureListener(exception ->
+                            Log.e(TAG, "Couldn't create file.", exception));
+        }
+    }
+
+    /**
+     * Retrieves the title and content of a file identified by {@code fileId} and populates the UI.
+     */
+    private void readFile(String fileId) {
+        if (mDriveServiceHelper != null) {
+            Log.i(TAG, "Reading file " + fileId);
+
+            mDriveServiceHelper.readFile(fileId)
+                    .addOnSuccessListener(nameAndContent -> {
+                        String name = nameAndContent.first;
+                        String content = nameAndContent.second;
+
+
+                        Log.i(TAG, "readFile:1 "+name);
+                        Log.i(TAG, "readFile:2 "+content);
+//                        setReadWriteMode(fileId);
+                    })
+                    .addOnFailureListener(exception ->
+                            Log.i(TAG, "Couldn't read file.", exception));
+        }
+    }
+
 
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -119,11 +166,13 @@ public class SignInActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken("176239420128-9nlr5g26crd7n3fg5q8oa0t482bo1nhh.apps.googleusercontent.com")
+//                .requestIdToken("176239420128-2qmo1hq47vc0i4j87ob2rt5nddsguvjs.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
     }
 
     @Override
