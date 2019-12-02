@@ -199,9 +199,10 @@ public class LoginActivity extends AppCompatActivity {
                         list.clear();
                         for (com.google.api.services.drive.model.File file : fileList.getFiles()) {
                             list.add(new GoogleDrive(file.getName(),
-                                    12313L,
-                                    new DateTime(1231212)));
+                                    file.getSize()/1014,
+                                    file.getCreatedTime()));
                         }
+
                         adapter.notifyDataSetChanged();
                     }
                 })

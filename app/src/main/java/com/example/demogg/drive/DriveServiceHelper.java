@@ -154,7 +154,7 @@ public class DriveServiceHelper {
      */
     public Task<FileList> queryFiles() {
         return Tasks.call(mExecutor, () ->
-                mDriveService.files().list().setSpaces("drive").execute());
+                mDriveService.files().list().setFields("nextPageToken, files(createdTime,id,name,size)").setSpaces("drive").execute());
     }
 
     /**
